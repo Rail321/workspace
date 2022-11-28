@@ -9,6 +9,7 @@
             v-for="( status, index ) of statusesOptions"
             v-bind:key="index"
             v-bind:value="status.id"
+            v-bind:disabled="status.disabled"
           >{{ status.title }}</option>
         </select>
       </div>
@@ -74,8 +75,23 @@
   const titleDisabled = computed( () => ( !ticketIsProcessing.value ) )
   const urlDisabled = computed( () => ( !ticketIsProcessing.value ) )
   const shortDescriptionDisabled = computed( () => ( !ticketIsProcessing.value ) )
+
+  const disabledOptions = [
+    { current: 'new', active: [ 'new', 'processing' ] },
+    { current: 'processing', active: [ 'processing', 'completed' ] },
+    { current: 'completed', active: [ 'completed' ] }
+  ]
   const statusesOptions = computed( () => (
-    statuses.value
+    statuses.value.map( el => {
+      el.disabled = true
+      if ( !!ticketStatus.value ) {
+        const finded = disabledOptions.find( option => option.current === ticketStatus.value.slug )
+        if ( finded )
+          if ( finded.active.includes( el.slug ) )
+            el.disabled = false
+      }
+      return el
+    } )
   ) )
 
   const onSaveForm = () => {
